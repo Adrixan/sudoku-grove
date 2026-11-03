@@ -1,0 +1,24 @@
+{
+  "name": "sudoku-grove",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Sudoku mit eigenem Generator, Techniktipps und Offline-Modus (lernspiele.aufner.org/teens/sudoku)",
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5",
+    "vitest": "^5.1.0"
+  }
+}
