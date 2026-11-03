@@ -9,6 +9,8 @@ const MAX_HISTORY = 500;
 export interface Settings {
   difficulty: Difficulty;
   showTimer: boolean;
+  /** optional "Informatik-Blick" panel next to the game (off by default: the game stands on its own) */
+  showInsight: boolean;
   highlightSame: boolean;
 }
 
@@ -23,7 +25,7 @@ export interface Saved {
   daily: Record<string, DailyResult>;
 }
 
-export const DEFAULT_SETTINGS: Settings = { difficulty: 'leicht', showTimer: true, highlightSame: true };
+export const DEFAULT_SETTINGS: Settings = { difficulty: 'leicht', showTimer: true, highlightSame: true, showInsight: false };
 
 const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
 const isMaskArray = (v: unknown): v is number[] =>
@@ -81,6 +83,7 @@ export function parseSaved(raw: unknown): Saved {
     const s = raw.settings;
     if (isDifficulty(s.difficulty)) out.settings.difficulty = s.difficulty;
     if (typeof s.showTimer === 'boolean') out.settings.showTimer = s.showTimer;
+    if (typeof s.showInsight === 'boolean') out.settings.showInsight = s.showInsight;
     if (typeof s.highlightSame === 'boolean') out.settings.highlightSame = s.highlightSame;
   }
   out.game = parseGame(raw.game);

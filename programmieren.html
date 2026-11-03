@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="description" content="Programmier-Tutorial in JavaScript: Schritt für Schritt zum eigenen Sudoku-Löser mit Backtracking und zum eigenen Generator.">
+  <meta name="theme-color" content="#121212">
+  <title>Selbst programmieren | Lernspiele</title>
+  <link rel="icon" type="image/svg+xml" href="./icon.svg">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="preload" href="./fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="./fonts/space-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="./fonts/fonts.css">
+  <script src="./theme-init.js"></script>
+  <script type="module" src="./src/info/programmieren.ts"></script>
+</head>
+<body>
+  <a href="#inhalt" class="skip-link">Zum Inhalt springen</a>
+
+  <header class="header">
+    <div class="header__inner">
+      <a href="./" class="header__brand">
+        <span class="header__logo" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"></rect><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line></svg>
+        </span>
+        <span>Sudoku<span class="visually-hidden">: zurück zum Spiel</span></span>
+      </a>
+      <button type="button" class="icon-button" id="theme-toggle" aria-label="Zum hellen Design wechseln">
+        <svg class="theme-toggle__sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+        <svg class="theme-toggle__moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="main prose" id="inhalt">
+    <nav class="learn-nav" aria-label="Lernbereich"><ul><li><a href="./info.html">Informatik dahinter</a></li><li><a href="./techniken.html">Lösungstechniken</a></li><li><a href="./programmieren.html" aria-current="page">Selbst programmieren</a></li><li><a href="./">Zum Spiel</a></li></ul></nav>
+    <p class="badge">Tutorial</p>
+    <h1 class="title">Selbst programmieren: Dein eigener Sudoku-Löser</h1>
+    <p class="lead">In sechs Schritten schreibst du in JavaScript ein Programm, das jedes Sudoku löst, prüft, ob es eindeutig ist, und am Ende sogar eigene Sudokus baut. Du brauchst keine Installation, nur einen Browser. Grundkenntnisse über Variablen, Schleifen und Funktionen helfen.</p>
+
+    <section aria-labelledby="vorbereitung-title">
+      <h2 id="vorbereitung-title">Vorbereitung: Wo schreibe ich den Code?</h2>
+      <ul>
+        <li><strong>Im Browser:</strong> Öffne die Entwicklerwerkzeuge (am Computer meist <kbd>F12</kbd> oder <kbd>Strg</kbd> + <kbd>Umschalt</kbd> + <kbd>I</kbd>) und wähle den Reiter <em>Konsole</em>. Kopiere einen Codeblock hinein und drücke <kbd>Enter</kbd>. Die Schritte bauen aufeinander auf: Führe sie der Reihe nach aus.</li>
+        <li><strong>Mit Node.js:</strong> Speichere den Code in einer Datei <code>sudoku.js</code> und starte sie mit <code>node sudoku.js</code>.</li>
+        <li>Sind die Entwicklerwerkzeuge auf deinem Schulgerät gesperrt, frag deine Lehrkraft nach einer JavaScript-Umgebung.</li>
+      </ul>
+      <p class="aside">Den ganzen Code als eine Datei findest du im Quellcode des Spiels: <a href="https://github.com/Adrixan/sudoku-grove/blob/main/tutorial/sudoku-tutorial.js">tutorial/sudoku-tutorial.js</a>. Er wird bei jeder Veröffentlichung automatisch getestet.</p>
+    </section>
+
+    <section aria-labelledby="s1-title">
+      <h2 id="s1-title">Schritt 1: Das Spielfeld als Liste</h2>
+      <p>Ein Sudoku hat 81 Felder. Wir schreiben es als Text mit 81 Ziffern, Zeile für Zeile, und verwandeln ihn in eine Liste (ein <em>Array</em>) mit Zahlen. Eine 0 steht für ein leeres Feld. Die Funktion <code>zeige</code> gibt das Feld lesbar aus.</p>
+      <!--snippet:schritt1-->
+      <p><strong>Aufgabe:</strong> Feld Nummer 0 ist links oben, Feld 80 rechts unten. Welche Nummer hat das Feld in Zeile 2, Spalte 1? Prüfe mit <code>feld[9]</code>.</p>
+    </section>
+
+    <section aria-labelledby="s2-title">
+      <h2 id="s2-title">Schritt 2: Darf die Ziffer hier stehen?</h2>
+      <p>Aus der Nummer <code>i</code> eines Feldes berechnen wir Zeile und Spalte: Zeile = <code>i</code> geteilt durch 9 (abgerundet), Spalte = Rest der Division (<code>i % 9</code>). Dann prüfen wir alle 9 Felder der Zeile, der Spalte und des Blocks.</p>
+      <!--snippet:schritt2-->
+      <p><strong>Aufgabe:</strong> Probiere <code>erlaubt(feld, 0, 7)</code>. Warum ist das Ergebnis <code>false</code>?</p>
+      <details class="steps"><summary>Lösung</summary><p>In der ersten Zeile steht schon eine 7 (drittes Feld). Eine Ziffer darf in jeder Zeile nur einmal vorkommen.</p></details>
+    </section>
+
+    <section aria-labelledby="s3-title">
+      <h2 id="s3-title">Schritt 3: Der Löser mit Backtracking</h2>
+      <p>Jetzt kommt der Kern: Die Funktion <code>loese</code> sucht das erste leere Feld und probiert die Ziffern 1 bis 9. Passt eine, ruft sie <strong>sich selbst</strong> auf, um den Rest zu lösen (das heißt <em>Rekursion</em>). Klappt das nicht, nimmt sie die Ziffer zurück und probiert die nächste. Dieses Zurückgehen heißt <strong>Backtracking</strong>.</p>
+      <!--snippet:schritt3-->
+      <p><strong>Aufgabe:</strong> Warum arbeiten wir mit <code>[...feld]</code>, einer Kopie? Was passiert mit <code>feld</code>, wenn du <code>loese(feld)</code> direkt aufrufst?</p>
+      <details class="steps"><summary>Lösung</summary><p><code>loese</code> verändert die Liste, die es bekommt. Ohne Kopie wäre das ursprüngliche Rätsel danach überschrieben, und die nächsten Schritte hätten nichts mehr zu lösen.</p></details>
+    </section>
+
+    <section aria-labelledby="s4-title">
+      <h2 id="s4-title">Schritt 4: Hat das Sudoku genau eine Lösung?</h2>
+      <p>Ein gutes Sudoku hat genau <strong>eine</strong> Lösung. Um das zu prüfen, zählt <code>zaehleLoesungen</code> alle Lösungen, hört aber bei 2 auf: Mehr müssen wir nicht wissen.</p>
+      <!--snippet:schritt4-->
+      <p><strong>Aufgabe:</strong> Lösche in einer Kopie des Rätsels einige Vorgaben (setze sie auf 0) und zähle erneut. Ab wann gibt es mehr als eine Lösung?</p>
+    </section>
+
+    <section aria-labelledby="s5-title">
+      <h2 id="s5-title">Schritt 5: Schneller durch eine kluge Reihenfolge</h2>
+      <p>Unser Löser nimmt einfach das erste leere Feld. Klüger ist es, immer das Feld mit den <strong>wenigsten Möglichkeiten</strong> zu wählen: Ein Feld mit nur einem Kandidaten ist gar keine Entscheidung. Mit einem Zähler sehen wir, wie viele Versuche nötig sind.</p>
+      <!--snippet:schritt5-->
+      <p><strong>Aufgabe:</strong> Baue denselben Zähler in <code>loese</code> aus Schritt 3 ein und vergleiche. Probiere auch dieses schwere Rätsel: <code>098700100040000000005093000200000950600109004079000008000350800000000070007001530</code>.</p>
+      <p class="aside">So arbeitet auch das Spiel. Es speichert die Kandidaten zusätzlich als Bitmasken, damit jede Prüfung nur einen Rechenschritt braucht (siehe <a href="./info.html#bits">Informatik dahinter</a>).</p>
+    </section>
+
+    <section aria-labelledby="s6-title">
+      <h2 id="s6-title">Schritt 6 (Bonus): Ein eigenes Sudoku bauen</h2>
+      <p>Mit den Bausteinen von vorhin bauen wir einen Generator: Zuerst füllt <code>fuelleZufaellig</code> ein leeres Feld mit Ziffern in zufälliger Reihenfolge. Dann entfernt <code>baueSudoku</code> Ziffern, solange das Rätsel eindeutig bleibt.</p>
+      <!--snippet:schritt6-->
+      <p><strong>Aufgaben zum Weiterdenken:</strong></p>
+      <ul>
+        <li>Wie viele Vorgaben haben deine Sudokus? Rufe <code>baueSudoku()</code> mehrmals auf und zähle die Ziffern ungleich 0.</li>
+        <li>Wie könntest du einstellen, wie schwer das Sudoku wird? Tipp: Das Spiel lässt zusätzlich einen „menschlichen“ Löser laufen, siehe <a href="./info.html#bewertung">Bewertung</a>.</li>
+        <li><code>Math.random()</code> liefert jedes Mal andere Zahlen. Wie bekommt man ein Tagesrätsel, das auf allen Geräten gleich ist? (<a href="./info.html#zufall">Zufall mit Startwert</a>)</li>
+      </ul>
+    </section>
+
+    <p><a class="button button--primary" href="./">Zum Spiel</a></p>
+  </main>
+
+  <footer class="footer">
+    <p>© 2026 Peter Aufner · <a href="../../">lernspiele.aufner.org</a> · <a href="https://github.com/Adrixan/sudoku-grove">Quellcode (AGPL-3.0)</a> · <a href="./fonts/LIZENZEN.txt">Schriften (OFL)</a></p>
+  </footer>
+</body>
+</html>

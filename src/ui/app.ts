@@ -78,6 +78,9 @@ export function startApp(): void {
   const confirmDialog = $<HTMLDialogElement>('confirm-dialog');
   const showTimerBox = $<HTMLInputElement>('show-timer');
   const highlightBox = $<HTMLInputElement>('highlight-same');
+  const insightBox = $<HTMLInputElement>('show-insight');
+  const hintMore = $<HTMLParagraphElement>('hint-more');
+  const hintMoreLink = $<HTMLAnchorElement>('hint-more-link');
 
   const announce = (text: string): void => {
     // Clear first so repeated messages are read again.
@@ -225,6 +228,8 @@ export function startApp(): void {
       hintTitle.textContent = hint.title;
       hintText.textContent = hint.text;
       hintApply.hidden = hint.kind !== 'step';
+      hintMore.hidden = hint.kind !== 'step';
+      if (hint.kind === 'step') hintMoreLink.href = `./techniken.html#${hint.step.technique}`;
     } else {
       hintPanel.hidden = true;
     }
@@ -237,7 +242,8 @@ export function startApp(): void {
   let analysis: { used: string; steps: number; tries: number; undos: number } | null = null;
 
   function renderInsight(g: Game): void {
-    if (!insight.open) return;
+    insight.hidden = !saved.settings.showInsight;
+    if (insight.hidden || !insight.open) return;
     const key = g.puzzle.givens.join('');
     if (key !== analysisKey) {
       const rating = rate(g.puzzle.givens);
@@ -504,6 +510,14 @@ export function startApp(): void {
     saved.settings.showTimer = showTimerBox.checked;
     persist();
     render();
+  });
+  insightBox.checked = saved.settings.showInsight;
+  insightBox.addEventListener('change', () => {
+    saved.settings.showInsight = insightBox.checked;
+    insight.open = insightBox.checked;
+    persist();
+    render();
+    announce(insightBox.checked ? 'Informatik-Blick eingeblendet, unter den Werkzeugen.' : 'Informatik-Blick ausgeblendet.');
   });
   highlightBox.checked = saved.settings.highlightSame;
   highlightBox.addEventListener('change', () => {

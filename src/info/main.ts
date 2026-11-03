@@ -395,6 +395,8 @@ function start(): void {
     const summary = document.createElement('summary');
     summary.textContent = 'Alle Schritte des menschlichen Lösers zeigen';
     const list = document.createElement('ol');
+    list.tabIndex = 0;
+    list.setAttribute('aria-label', 'Schritte des menschlichen Lösers');
     for (const step of rating.steps) {
       const li = document.createElement('li');
       const { title, text } = explain(step);

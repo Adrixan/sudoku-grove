@@ -9,7 +9,7 @@ A JavaScript Sudoku game for students (ages 10 to 18) under the Prof. Aufner edu
 - Features in v1: own generator with difficulty levels; pencil marks, conflict highlighting, undo/redo and hints that explain the technique; optional timer and a seeded daily puzzle; offline PWA with progress and settings saved only in the browser.
 - Route `teens/sudoku`, classic 9x9 only.
 - Stack: Vite, strict TypeScript, vanilla DOM (no UI framework), Vitest; zero runtime dependencies.
-- Informatik-Einblicke (Peter, 2026-11-03): `info.html` explains data structure, bitmasks, PRNG, generator, backtracking and rating with live demos on the real engine; the game has an "Informatik-Blick" panel. Keep both in sync when the engine changes (texts quote simplified code). Sources there are verified; do not add facts without a checked source.
+- Informatik-Einblicke (Peter, 2026-11-03): the game stands on its own; the deeper layer is optional. The "Informatik-Blick" panel is a setting, off by default (`settings.showInsight`). Learning area, linked quietly from the footer, the hint panel and the panel: `info.html` (Informatik dahinter: data structure, bitmasks, PRNG, generator, backtracking, rating, live demos), `techniken.html` (tutorial per technique with real examples from `src/info/technique-examples.json`, rebuilt by `npm run examples` after engine changes) and `programmieren.html` (JavaScript tutorial whose code is inserted at build time from `tutorial/sudoku-tutorial.js`, tested by Vitest). Keep texts in sync with the engine; sources there are verified, add no fact without a checked source.
 - Name `sudoku-grove`; code licence AGPL-3.0 (like lernspiele and lernmaterial); fonts SIL OFL 1.1 with their licence texts.
 
 ## Release
