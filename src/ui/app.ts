@@ -3,6 +3,7 @@ import { dailyDifficulty, dailySeed, viennaDate } from '../engine/daily.ts';
 import {
   type Game,
   applyHint,
+  basicCandidates,
   conflictCells,
   erase,
   fillAllNotes,
@@ -16,14 +17,17 @@ import {
   wrongCells,
 } from '../engine/game.ts';
 import { type Puzzle, generate } from '../engine/generator.ts';
+import { traceSearch } from '../engine/solver.ts';
+import { TECHNIQUE_NAMES } from '../engine/hints.ts';
 import { CELLS, bit, boxOf, colOf, digitsOf, rowOf } from '../engine/grid.ts';
 import { type Hint, cellName, getHint, hintArea } from '../engine/hints.ts';
-import { DIFFICULTIES, type Difficulty } from '../engine/rater.ts';
+import { DIFFICULTIES, type Difficulty, rate } from '../engine/rater.ts';
+import type { Technique } from '../engine/techniques.ts';
 import { randomSeed } from '../engine/rng.ts';
 import { type Saved, load, save } from '../storage/store.ts';
+import { initThemeToggle } from './theme.ts';
 
 const LABEL: Record<Difficulty, string> = { leicht: 'Leicht', mittel: 'Mittel', schwer: 'Schwer', experte: 'Experte' };
-const THEME_KEY = 'lernspiele-theme';
 
 function $<T extends HTMLElement>(id: string): T {
   const el = document.getElementById(id);
@@ -214,6 +218,8 @@ export function startApp(): void {
     timerEl.hidden = !saved.settings.showTimer;
     timerEl.textContent = formatTime(g.elapsedMs);
 
+    renderInsight(g);
+
     if (hint) {
       hintPanel.hidden = false;
       hintTitle.textContent = hint.title;
@@ -223,6 +229,47 @@ export function startApp(): void {
       hintPanel.hidden = true;
     }
   }
+
+  // ---------- Informatik-Blick ----------
+  const insight = $<HTMLDetailsElement>('insight');
+  const insightBody = $<HTMLDivElement>('insight-body');
+  let analysisKey = '';
+  let analysis: { used: string; steps: number; tries: number; undos: number } | null = null;
+
+  function renderInsight(g: Game): void {
+    if (!insight.open) return;
+    const key = g.puzzle.givens.join('');
+    if (key !== analysisKey) {
+      const rating = rate(g.puzzle.givens);
+      const search = traceSearch(g.puzzle.givens, 2, 0);
+      const used = (Object.entries(rating.used) as [Technique, number][]).map(([t, n]) => `${TECHNIQUE_NAMES[t]} ×${n}`).join(', ');
+      analysis = { used, steps: rating.steps.length, tries: search.tries, undos: search.undos };
+      analysisKey = key;
+    }
+    const a = analysis;
+    const r = rowOf(selected);
+    const c = colOf(selected);
+    const cands = basicCandidates(g.values, selected);
+    const lines: [string, string][] = [
+      ['Startwert', g.puzzle.seed],
+      ['Vorgaben', `${g.puzzle.givens.filter(Boolean).length} von 81`],
+      ['Menschlicher Löser', a ? `${a.steps} Schritte: ${a.used}` : ''],
+      ['Eindeutigkeitsbeweis', a ? `${a.tries} Versuche, ${a.undos} Rücknahmen (Backtracking)` : ''],
+      ['Gewähltes Feld', `Index ${selected} = 9 · ${r} + ${c}, Block ${boxOf(selected)}`],
+      ['Kandidaten', g.values[selected] ? 'Feld ist ausgefüllt' : `${digitsOf(cands).join(', ') || 'keine'} = 0b${cands.toString(2).padStart(9, '0')}`],
+    ];
+    const dl = document.createElement('dl');
+    dl.className = 'insight__list';
+    for (const [k, v] of lines) {
+      const dt = document.createElement('dt');
+      dt.textContent = k;
+      const dd = document.createElement('dd');
+      dd.textContent = v;
+      dl.append(dt, dd);
+    }
+    insightBody.replaceChildren(dl);
+  }
+  insight.addEventListener('toggle', () => game && renderInsight(game));
 
   // ---------- game flow ----------
   function update(next: Game, message?: string): void {
@@ -465,23 +512,7 @@ export function startApp(): void {
     render();
   });
 
-  // Theme toggle (same key as the lernspiele start page).
-  const themeBtn = $<HTMLButtonElement>('theme-toggle');
-  const applyTheme = (theme: 'light' | 'dark'): void => {
-    document.documentElement.setAttribute('data-theme', theme);
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'light' ? '#f6f8f6' : '#121212');
-    themeBtn.setAttribute('aria-label', theme === 'light' ? 'Zum dunklen Design wechseln' : 'Zum hellen Design wechseln');
-  };
-  applyTheme(document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark');
-  themeBtn.addEventListener('click', () => {
-    const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-    applyTheme(next);
-    try {
-      localStorage.setItem(THEME_KEY, next);
-    } catch {
-      /* storage blocked: theme lasts for this visit */
-    }
-  });
+  initThemeToggle();
 
   // Timer: counts only while the page is visible and a game is running.
   let last = performance.now();

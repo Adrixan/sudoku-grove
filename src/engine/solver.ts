@@ -2,14 +2,21 @@
 import { ALL_DIGITS, CELLS, type Grid, bit, boxOf, colOf, popcount, rowOf } from './grid.ts';
 import type { Rng } from './rng.ts';
 
+/** Search events for teaching views: a digit is tried, taken back, or a full solution is reached. */
+export type SearchEvent =
+  | { type: 'try'; cell: number; digit: number; depth: number }
+  | { type: 'undo'; cell: number; depth: number }
+  | { type: 'solution'; count: number };
+
 interface SearchOptions {
   limit: number;
   rng?: Rng;
   onSolution?: (grid: Grid) => void;
+  onEvent?: (event: SearchEvent) => void;
 }
 
 /** Returns the number of solutions found, stopping at `limit`. Invalid givens yield 0. */
-function search(start: Grid, { limit, rng, onSolution }: SearchOptions): number {
+function search(start: Grid, { limit, rng, onSolution, onEvent }: SearchOptions): number {
   const cells = [...start];
   const rows = new Array<number>(9).fill(0);
   const cols = new Array<number>(9).fill(0);
@@ -28,6 +35,7 @@ function search(start: Grid, { limit, rng, onSolution }: SearchOptions): number 
   }
 
   let found = 0;
+  let depth = 0;
   const recurse = (): boolean => {
     let best = -1;
     let bestMask = 0;
@@ -46,6 +54,7 @@ function search(start: Grid, { limit, rng, onSolution }: SearchOptions): number 
     if (best === -1) {
       found++;
       onSolution?.([...cells]);
+      onEvent?.({ type: 'solution', count: found });
       return found >= limit;
     }
     if (bestCount === 0) return false;
@@ -61,10 +70,15 @@ function search(start: Grid, { limit, rng, onSolution }: SearchOptions): number 
       rows[r]! |= m;
       cols[c]! |= m;
       boxes[b]! |= m;
-      if (recurse()) return true;
+      onEvent?.({ type: 'try', cell: best, digit: d, depth });
+      depth++;
+      const stop = recurse();
+      depth--;
+      if (stop) return true;
       rows[r]! &= ~m;
       cols[c]! &= ~m;
       boxes[b]! &= ~m;
+      onEvent?.({ type: 'undo', cell: best, depth });
     }
     cells[best] = 0;
     return false;
@@ -92,4 +106,28 @@ export function randomSolution(grid: Grid, rng: Rng): Grid | null {
   let solution: Grid | null = null;
   search(grid, { limit: 1, rng, onSolution: (g) => (solution = g) });
   return solution;
+}
+
+export interface SearchTrace {
+  solutions: number;
+  tries: number;
+  undos: number;
+  /** recorded events, at most `maxEvents` (the counters always cover the whole search) */
+  events: SearchEvent[];
+  truncated: boolean;
+}
+
+/** Runs the uniqueness check (search for up to `limit` solutions) and records what the solver does. */
+export function traceSearch(grid: Grid, limit = 2, maxEvents = 50_000): SearchTrace {
+  const trace: SearchTrace = { solutions: 0, tries: 0, undos: 0, events: [], truncated: false };
+  trace.solutions = search(grid, {
+    limit,
+    onEvent: (e) => {
+      if (e.type === 'try') trace.tries++;
+      else if (e.type === 'undo') trace.undos++;
+      if (trace.events.length < maxEvents) trace.events.push(e);
+      else trace.truncated = true;
+    },
+  });
+  return trace;
 }

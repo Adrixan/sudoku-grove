@@ -29,17 +29,23 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin || !url.href.startsWith(self.registration.scope)) return;
 
   if (request.mode === 'navigate') {
-    // Network first for the page so updates arrive; cached page when offline.
+    // Network first for pages so updates arrive; the cached page (or the game) when offline.
+    const key = url.pathname.endsWith('/') ? new URL('./', self.registration.scope).href : url.href.split('#')[0].split('?')[0];
     event.respondWith(
       fetch(request)
         .then((response) => {
           if (response.ok) {
             const copy = response.clone();
-            caches.open(CACHE).then((cache) => cache.put(new URL('./', self.registration.scope), copy));
+            caches.open(CACHE).then((cache) => cache.put(key, copy));
           }
           return response;
         })
-        .catch(() => caches.match(new URL('./', self.registration.scope)).then((r) => r || Response.error())),
+        .catch(() =>
+          caches
+            .match(key)
+            .then((r) => r || caches.match(new URL('./', self.registration.scope)))
+            .then((r) => r || Response.error()),
+        ),
     );
     return;
   }

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="description" content="Wie ein Programm Sudokus erzeugt, löst und bewertet: Datenstrukturen, Bitmasken, Pseudozufall, Backtracking und Lösungstechniken zum Ausprobieren.">
+  <meta name="theme-color" content="#121212">
+  <title>Informatik hinter dem Sudoku | Lernspiele</title>
+  <link rel="icon" type="image/svg+xml" href="./icon.svg">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="preload" href="./fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="./fonts/space-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="./fonts/fonts.css">
+  <script src="./theme-init.js"></script>
+  <script type="module" src="./src/info/main.ts"></script>
+</head>
+<body>
+  <a href="#inhalt" class="skip-link">Zum Inhalt springen</a>
+
+  <header class="header">
+    <div class="header__inner">
+      <a href="./" class="header__brand">
+        <span class="header__logo" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"></rect><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line></svg>
+        </span>
+        <span>Sudoku<span class="visually-hidden">: zurück zum Spiel</span></span>
+      </a>
+      <button type="button" class="icon-button" id="theme-toggle" aria-label="Zum hellen Design wechseln">
+        <svg class="theme-toggle__sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+        <svg class="theme-toggle__moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="main prose" id="inhalt">
+    <p class="badge">Informatik</p>
+    <h1 class="title">Informatik hinter dem Sudoku</h1>
+    <p class="lead">Die Rätsel in diesem Spiel stammen aus keinem Buch. Ein Programm in deinem Browser baut jedes Sudoku neu, beweist, dass es genau eine Lösung hat, und schätzt ein, wie schwer es für Menschen ist. Auf dieser Seite siehst du, wie das funktioniert, und kannst alles selbst ausprobieren.</p>
+
+    <nav class="toc" aria-labelledby="toc-title">
+      <h2 id="toc-title">Inhalt</h2>
+      <ol>
+        <li><a href="#speicher">Das Spielfeld im Speicher</a></li>
+        <li><a href="#bits">Kandidaten als Bitmaske</a></li>
+        <li><a href="#zufall">Zufall mit Startwert</a></li>
+        <li><a href="#generator">Der Generator</a></li>
+        <li><a href="#loeser">Der Löser: Backtracking</a></li>
+        <li><a href="#bewertung">Wie schwer ist es? Die Bewertung</a></li>
+        <li><a href="#technik">Technik der Webseite</a></li>
+        <li><a href="#fakten">Zahlen, Fakten, Quellen</a></li>
+        <li><a href="#weiterdenken">Zum Weiterdenken</a></li>
+      </ol>
+    </nav>
+
+    <section id="speicher" aria-labelledby="speicher-title">
+      <h2 id="speicher-title">1. Das Spielfeld im Speicher</h2>
+      <p>Für den Computer ist das Spielfeld kein Quadrat, sondern eine <strong>Liste (Array) mit 81 Zahlen</strong>. Eine 0 steht für ein leeres Feld. Die Felder werden Zeile für Zeile durchnummeriert, beginnend bei 0. So lässt sich aus dem <strong>Index</strong> eines Feldes ausrechnen, wo es liegt:</p>
+      <ul>
+        <li>Index = 9 · Zeile + Spalte (Zeile und Spalte ab 0 gezählt)</li>
+        <li>Zeile = Index geteilt durch 9, ohne Rest; Spalte = Rest dieser Division (Modulo)</li>
+        <li>Block = 3 · (Zeile geteilt durch 3) + (Spalte geteilt durch 3), jeweils ohne Rest</li>
+      </ul>
+      <p>Zeilen, Spalten und Blöcke heißen im Programm <strong>Einheiten</strong>: Es gibt 27 davon. Jedes Feld teilt sich mit genau <strong>20 anderen Feldern</strong> eine Einheit. Diese Nachbarn darf es nie mit derselben Ziffer geben.</p>
+      <pre tabindex="0" aria-label="Codebeispiel"><code>const zeileVon = (i: number) =&gt; Math.floor(i / 9);
+const spalteVon = (i: number) =&gt; i % 9;
+const blockVon = (i: number) =&gt;
+  Math.floor(zeileVon(i) / 3) * 3 + Math.floor(spalteVon(i) / 3);</code></pre>
+      <div class="demo" aria-labelledby="demo-feld-title">
+        <h3 id="demo-feld-title">Ausprobieren: Wähle ein Feld</h3>
+        <p class="demo__hint">Klicke auf ein Feld oder gehe mit den Pfeiltasten durch das Gitter. Die 20 Nachbarn werden markiert.</p>
+        <div class="demo__body">
+          <div id="demo-feld-board" class="demo__board"></div>
+          <div class="demo__out" id="demo-feld-out" aria-live="polite"></div>
+        </div>
+      </div>
+      <p class="aside">Weil der Löser diese Rechnungen Millionen Mal braucht, rechnet das Programm sie beim Start einmal für alle 81 Felder aus und speichert die Ergebnisse in Tabellen. Nachschlagen ist schneller als jedes Mal neu dividieren.</p>
+    </section>
+
+    <section id="bits" aria-labelledby="bits-title">
+      <h2 id="bits-title">2. Kandidaten als Bitmaske</h2>
+      <p>Welche Ziffern passen noch in ein leeres Feld? Das Programm merkt sich das nicht als Liste, sondern als <strong>eine einzige Zahl</strong>: Jede der 9 Ziffern bekommt ein Bit. Bit 1 steht für die 1, Bit 9 für die 9. Ist ein Bit 1, ist die Ziffer noch möglich.</p>
+      <p>Mit <strong>Bitoperationen</strong> rechnet der Prozessor damit in einem einzigen Schritt: ODER (<code>|</code>) vereinigt zwei Mengen, UND (<code>&amp;</code>) bildet die Schnittmenge, NICHT (<code>~</code>) dreht alle Bits um. Die Anzahl der gesetzten Bits (der <em>Popcount</em>) ist die Anzahl der Kandidaten.</p>
+      <pre tabindex="0" aria-label="Codebeispiel"><code>const bit = (z: number) =&gt; 1 &lt;&lt; (z - 1); // 5 wird zu 0b000010000
+let maske = 0b111111111;                // alle 9 Ziffern möglich
+maske &amp;= ~bit(7);                       // die 7 streichen
+const passt5 = (maske &amp; bit(5)) !== 0;  // ist die 5 noch möglich?</code></pre>
+      <div class="demo" aria-labelledby="demo-bits-title">
+        <h3 id="demo-bits-title">Ausprobieren: Bits umschalten</h3>
+        <p class="demo__hint">Schalte Ziffern ein und aus, oder übernimm die Kandidaten des Feldes, das du oben gewählt hast.</p>
+        <div class="bit-row" id="demo-bits" role="group" aria-label="Ziffern als Bits"></div>
+        <div class="demo__actions">
+          <button type="button" class="button" id="demo-bits-from-cell">Kandidaten des gewählten Feldes übernehmen</button>
+        </div>
+        <div class="demo__out" id="demo-bits-out" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section id="zufall" aria-labelledby="zufall-title">
+      <h2 id="zufall-title">3. Zufall mit Startwert</h2>
+      <p>Ein Computer würfelt nicht. Ein <strong>Pseudozufallszahlengenerator</strong> (PRNG) berechnet aus einem <strong>Startwert</strong> (englisch <em>Seed</em>) eine Folge von Zahlen, die zufällig aussieht. Gleicher Startwert, gleiche Folge: Das ist kein Fehler, sondern genau das, was wir brauchen.</p>
+      <ul>
+        <li>Eine <strong>Hashfunktion</strong> (cyrb128) verwandelt einen Text wie <code>daily-2026-11-03</code> in vier 32-Bit-Zahlen. Schon ein anderes Zeichen ergibt ganz andere Zahlen.</li>
+        <li>Der Generator <strong>sfc32</strong> („Small Fast Counting“) mischt diese vier Zahlen mit Addition, Verschiebung und XOR bei jedem Aufruf neu und liefert die nächste Zahl.</li>
+        <li>Das <strong>Tagesrätsel</strong> nutzt das Datum als Startwert. Darum hat in Österreich jedes Gerät am selben Tag dasselbe Rätsel, ganz ohne Server.</li>
+        <li>Für „Neues Spiel“ holt das Programm den Startwert aus <code>crypto.getRandomValues</code>, dem Zufall des Betriebssystems.</li>
+      </ul>
+      <p class="aside aside--alert">Ein PRNG wie sfc32 ist gut für Spiele, aber nicht für Passwörter oder Verschlüsselung: Wer den Startwert kennt, kennt alle Zahlen.</p>
+      <div class="demo" aria-labelledby="demo-zufall-title">
+        <h3 id="demo-zufall-title">Ausprobieren: Zahlen ziehen</h3>
+        <div class="demo__actions">
+          <div class="field">
+            <label for="demo-seed">Startwert</label>
+            <input id="demo-seed" type="text" maxlength="40" autocomplete="off" spellcheck="false">
+          </div>
+          <button type="button" class="button button--primary" id="demo-seed-run">10 Ziffern ziehen</button>
+        </div>
+        <p class="demo__hint">Ziehe zweimal mit demselben Startwert. Ändere dann ein einziges Zeichen.</p>
+        <div class="demo__out" id="demo-seed-out" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section id="generator" aria-labelledby="generator-title">
+      <h2 id="generator-title">4. Der Generator</h2>
+      <p>Ein neues Sudoku entsteht in drei Schritten:</p>
+      <ol>
+        <li><strong>Volles Gitter bauen:</strong> Der Löser aus Kapitel 5 füllt ein leeres Gitter. Weil er die Ziffern in zufälliger Reihenfolge probiert, entsteht jedes Mal eine andere gültige Lösung.</li>
+        <li><strong>Ziffern entfernen:</strong> Das Programm nimmt Ziffern paarweise heraus, Feld <var>i</var> und Feld 80 − <var>i</var>. So sieht das Rätsel punktsymmetrisch aus. Nach jedem Schritt prüft es zwei Dinge: Gibt es noch <em>genau eine</em> Lösung? Und ist das Rätsel nicht schwerer als die gewünschte Stufe? Wenn nicht, kommen die Ziffern zurück.</li>
+        <li><strong>Bewerten:</strong> Am Ende misst die Bewertung (Kapitel 6) die Schwierigkeit. Passt sie nicht, beginnt ein neuer Versuch mit dem Startwert <code>…#1</code>, <code>…#2</code> und so weiter. Reicht die Symmetrie für schwere Stufen nicht, entfernt das Programm zusätzlich einzelne Felder.</li>
+      </ol>
+      <div class="demo" aria-labelledby="demo-gen-title">
+        <h3 id="demo-gen-title">Ausprobieren: Generator in Zeitlupe</h3>
+        <div class="demo__actions">
+          <div class="field">
+            <label for="demo-gen-level">Stufe</label>
+            <select id="demo-gen-level">
+              <option value="leicht">Leicht</option>
+              <option value="mittel" selected>Mittel</option>
+              <option value="schwer">Schwer</option>
+              <option value="experte">Experte</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="demo-gen-seed">Startwert</label>
+            <input id="demo-gen-seed" type="text" maxlength="40" autocomplete="off" spellcheck="false">
+          </div>
+          <button type="button" class="button button--primary" id="demo-gen-run">Erzeugen</button>
+        </div>
+        <div class="demo__body">
+          <div id="demo-gen-board" class="demo__board"></div>
+          <div class="demo__out">
+            <dl class="stats" id="demo-gen-stats"></dl>
+            <div class="legend" aria-hidden="true">
+              <span class="legend__item legend__item--removed">entfernt</span>
+              <span class="legend__item legend__item--back">zurückgelegt</span>
+            </div>
+            <p id="demo-gen-status" aria-live="polite"></p>
+            <div class="demo__actions">
+              <button type="button" class="button" id="demo-gen-play">Abspielen</button>
+              <button type="button" class="button" id="demo-gen-step">Ein Schritt</button>
+              <button type="button" class="button" id="demo-gen-end">Zum Ende</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="loeser" aria-labelledby="loeser-title">
+      <h2 id="loeser-title">5. Der Löser: Backtracking</h2>
+      <p>Der Löser probiert systematisch: Er wählt ein leeres Feld, setzt eine passende Ziffer ein und macht weiter. Landet er in einer Sackgasse (ein Feld hat keinen Kandidaten mehr), geht er einen Schritt zurück und probiert die nächste Ziffer. Dieses Zurückgehen heißt <strong>Backtracking</strong>, das Verfahren ist eine <strong>Tiefensuche</strong> in einem Suchbaum.</p>
+      <ul>
+        <li><strong>Trick „wenigste Möglichkeiten zuerst“</strong> (englisch <em>minimum remaining values</em>): Der Löser wählt immer das Feld mit den wenigsten Kandidaten. Ein Feld mit nur einem Kandidaten ist gar keine Entscheidung. So bleibt der Suchbaum klein.</li>
+        <li><strong>Eindeutigkeit beweisen:</strong> Der Löser hört nach der ersten Lösung nicht auf, sondern sucht eine zweite. Erst wenn der ganze restliche Suchbaum ohne zweite Lösung durchsucht ist, steht fest: Das Rätsel hat genau eine Lösung.</li>
+      </ul>
+      <pre tabindex="0" aria-label="Codebeispiel"><code>function suche(feld: number[]): number {
+  const i = feldMitWenigstenKandidaten(feld);
+  if (i === -1) return 1;            // alles voll: eine Lösung gefunden
+  let loesungen = 0;
+  for (const z of kandidaten(feld, i)) {
+    feld[i] = z;                     // versuchen
+    loesungen += suche(feld);        // rekursiv weitersuchen
+    feld[i] = 0;                     // zurücknehmen (Backtracking)
+    if (loesungen &gt;= 2) break;       // zweite Lösung: nicht eindeutig
+  }
+  return loesungen;
+}</code></pre>
+      <p class="aside">Achte im Demo auf die Zähler: Nach der ersten Lösung nimmt der Löser alle Versuche wieder zurück, um nach einer zweiten Lösung zu suchen. Bei einem eindeutigen Sudoku gibt es darum am Ende genauso viele Rücknahmen wie Versuche. Bei einem leichten Sudoku ist jeder Versuch ein Treffer, bei einem schweren muss der Löser auch falsche Wege gehen.</p>
+      <div class="demo" aria-labelledby="demo-solve-title">
+        <h3 id="demo-solve-title">Ausprobieren: Der Löser bei der Arbeit</h3>
+        <p class="demo__hint">Der Löser arbeitet am Sudoku aus dem Generator oben. Grün: gerade probiert. Orange: wieder zurückgenommen.</p>
+        <div class="demo__body">
+          <div id="demo-solve-board" class="demo__board"></div>
+          <div class="demo__out">
+            <dl class="stats" id="demo-solve-stats"></dl>
+            <p id="demo-solve-status" aria-live="polite"></p>
+            <div class="demo__actions">
+              <button type="button" class="button" id="demo-solve-play">Abspielen</button>
+              <button type="button" class="button" id="demo-solve-step">Ein Schritt</button>
+              <button type="button" class="button" id="demo-solve-end">Zum Ende</button>
+              <div class="field">
+                <label for="demo-solve-speed">Tempo</label>
+                <select id="demo-solve-speed">
+                  <option value="1">langsam</option>
+                  <option value="4" selected>mittel</option>
+                  <option value="40">schnell</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="bewertung" aria-labelledby="bewertung-title">
+      <h2 id="bewertung-title">6. Wie schwer ist es? Die Bewertung</h2>
+      <p>Mit Backtracking löst der Computer jedes Sudoku in Millisekunden. Über die Schwierigkeit für Menschen sagt das nichts. Darum gibt es einen zweiten Löser, der wie ein Mensch vorgeht: Er rät nie, sondern nutzt nur logische <strong>Lösungstechniken</strong> und nimmt immer den einfachsten Schritt, den er findet. Die Stufe richtet sich nach der <strong>schwierigsten Technik</strong>, die er braucht. Diese Schritte sind auch die Tipps im Spiel.</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="Tabelle der Lösungstechniken">
+        <table>
+          <caption>Lösungstechniken und ihre Stufe</caption>
+          <thead><tr><th scope="col">Technik</th><th scope="col">Stufe</th><th scope="col">Idee</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Versteckter Single</th><td>Leicht</td><td>In einer Einheit gibt es für eine Ziffer nur noch ein Feld.</td></tr>
+            <tr><th scope="row">Nackter Single</th><td>Leicht</td><td>In ein Feld passt nur noch eine Ziffer.</td></tr>
+            <tr><th scope="row">Zeiger</th><td>Mittel</td><td>In einem Block liegt eine Ziffer nur in einer Zeile oder Spalte: Dort fällt sie außerhalb des Blocks weg.</td></tr>
+            <tr><th scope="row">Block-Linien-Regel</th><td>Mittel</td><td>In einer Zeile oder Spalte liegt eine Ziffer nur in einem Block: Im Rest des Blocks fällt sie weg.</td></tr>
+            <tr><th scope="row">Nacktes und verstecktes Paar</th><td>Mittel</td><td>Zwei Felder teilen sich zwei Ziffern ganz: Andere Kandidaten fallen weg.</td></tr>
+            <tr><th scope="row">Nacktes und verstecktes Tripel</th><td>Schwer</td><td>Dasselbe mit drei Feldern und drei Ziffern.</td></tr>
+            <tr><th scope="row">X-Wing</th><td>Schwer</td><td>Eine Ziffer steht in zwei Zeilen nur in denselben zwei Spalten: In diesen Spalten fällt sie sonst weg.</td></tr>
+            <tr><th scope="row">XY-Wing</th><td>Experte</td><td>Drei Felder mit je zwei Kandidaten bilden eine Kette, die eine Ziffer ausschließt.</td></tr>
+            <tr><th scope="row">Swordfish</th><td>Experte</td><td>Wie X-Wing, aber mit drei Zeilen und drei Spalten.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="demo" aria-labelledby="demo-rate-title">
+        <h3 id="demo-rate-title">Ausprobieren: Bewertung des erzeugten Sudokus</h3>
+        <div class="demo__out" id="demo-rate-out"></div>
+      </div>
+    </section>
+
+    <section id="technik" aria-labelledby="technik-title">
+      <h2 id="technik-title">7. Technik der Webseite</h2>
+      <ul>
+        <li><strong>Web Worker:</strong> Ein schweres Sudoku zu bauen kann eine Sekunde dauern. Das passiert in einem eigenen Thread, damit die Seite währenddessen nicht einfriert.</li>
+        <li><strong>Service Worker:</strong> Beim ersten Besuch speichert der Browser alle Dateien des Spiels. Danach funktioniert es auch ohne Internet und lässt sich wie eine App installieren (Progressive Web App).</li>
+        <li><strong>Datenschutz:</strong> Der Spielstand liegt nur im Speicher deines Browsers (<code>localStorage</code>). Es gibt keine Anmeldung, keinen Server für Spielstände und keine Tracker. Eine <em>Content Security Policy</em> verbietet der Seite, irgendetwas von fremden Servern zu laden.</li>
+        <li><strong>Tests:</strong> Über 40 automatische Tests prüfen den Code, zum Beispiel dass jedes erzeugte Sudoku genau eine Lösung hat und dass kein Tipp der Lösung widerspricht. Sie laufen vor jeder Veröffentlichung.</li>
+      </ul>
+      <p>Der ganze Quellcode ist offen: <a href="https://github.com/Adrixan/sudoku-grove">github.com/Adrixan/sudoku-grove</a>. Die Spiellogik steckt in <code>src/engine/</code>: <code>grid.ts</code> (Spielfeld), <code>rng.ts</code> (Zufall), <code>solver.ts</code> (Backtracking), <code>techniques.ts</code> und <code>rater.ts</code> (Bewertung), <code>generator.ts</code> und <code>hints.ts</code> (Tipps).</p>
+    </section>
+
+    <section id="fakten" aria-labelledby="fakten-title">
+      <h2 id="fakten-title">8. Zahlen, Fakten, Quellen</h2>
+      <ul>
+        <li>Es gibt 6 670 903 752 021 072 936 960 verschiedene vollständig ausgefüllte 9×9-Sudoku-Gitter (Felgenhauer und Jarvis 2006).</li>
+        <li>Ein Sudoku mit eindeutiger Lösung braucht mindestens 17 Vorgaben. Mit 16 geht es nie: Das wurde mit einer riesigen Computersuche bewiesen (McGuire, Tugemann und Civario 2014).</li>
+        <li>Sudoku in beliebiger Größe (n² × n² Felder) ist <strong>NP-vollständig</strong> (Yato und Seta 2003). Niemand kennt ein Verfahren, das große Sudokus immer schnell löst. Für 9×9 ist der Suchbaum zum Glück klein genug.</li>
+      </ul>
+      <h3>Quellen</h3>
+      <ul class="refs">
+        <li>Felgenhauer, B. und Jarvis, F. (2006). Mathematics of Sudoku I. <em>Mathematical Spectrum</em>, 39(1), 15–22.</li>
+        <li>McGuire, G., Tugemann, B. und Civario, G. (2014). There Is No 16-Clue Sudoku: Solving the Sudoku Minimum Number of Clues Problem via Hitting Set Enumeration. <em>Experimental Mathematics</em>, 23(2), 190–217. doi:10.1080/10586458.2013.870056</li>
+        <li>Yato, T. und Seta, T. (2003). Complexity and Completeness of Finding Another Solution and Its Application to Puzzles. <em>IEICE Transactions on Fundamentals of Electronics, Communications and Computer Sciences</em>, E86-A(5), 1052–1060.</li>
+      </ul>
+    </section>
+
+    <section id="weiterdenken" aria-labelledby="weiterdenken-title">
+      <h2 id="weiterdenken-title">9. Zum Weiterdenken</h2>
+      <ol>
+        <li>Welchen Index hat das Feld in Zeile 7, Spalte 3 (ab 1 gezählt)? In welchem Block liegt es?</li>
+        <li>Wie viele Bits bräuchte eine Kandidatenmaske bei einem 16×16-Sudoku mit den Zeichen 1 bis 9 und A bis G?</li>
+        <li>Warum braucht der Löser weniger Versuche, wenn er das Feld mit den wenigsten Kandidaten zuerst wählt? Vergleiche im Löser-Demo ein leichtes und ein schweres Sudoku.</li>
+        <li>Warum muss der Löser nach der ersten Lösung weitersuchen, um die Eindeutigkeit zu zeigen?</li>
+        <li>Das Tagesrätsel braucht keinen Server. Was müsste passieren, damit zwei Geräte doch verschiedene Tagesrätsel zeigen?</li>
+      </ol>
+    </section>
+
+    <p><a class="button button--primary" href="./">Zurück zum Spiel</a></p>
+  </main>
+
+  <footer class="footer">
+    <p>© 2026 Peter Aufner · <a href="../../">lernspiele.aufner.org</a> · <a href="https://github.com/Adrixan/sudoku-grove">Quellcode (AGPL-3.0)</a> · <a href="./fonts/LIZENZEN.txt">Schriften (OFL)</a></p>
+  </footer>
+</body>
+</html>

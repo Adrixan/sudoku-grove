@@ -6,4 +6,5 @@ Stories in order; each one is test-first where the logic is pure. Decisions live
 - [x] S4 UI: accessible grid (roving tabindex, arrow keys, digits, Backspace, N for notes, aria-live), number pad for touch, difficulty picker, daily puzzle (Europe/Vienna date seed), generation in a Web Worker.
 - [x] S5 Storage: versioned save of the running game and settings in localStorage (try/catch, schema check).
 - [x] S6 PWA: manifest, service worker scoped to the route, offline after first visit; CSP `default-src 'self'`.
+- [x] S8 Informatik-Einblicke: teaching page `info.html` with demos (cell index, bitmask, PRNG, generator replay, backtracking replay, rating) and the in-game panel; solver and generator emit trace events.
 - [ ] S7 Integration: lernspiele `release-manifest.json` source and `teens/sudoku` path, landing-page card; local release build; accessibility check on the local build; release only with Peter's go.

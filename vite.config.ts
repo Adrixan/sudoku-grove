@@ -52,6 +52,7 @@ function serviceWorker(): Plugin {
       for (const f of files) hash.update(f).update(readFileSync(join(outDir, f)));
       const template = readFileSync('src/sw-template.js', 'utf8');
       const assets = ['./', ...files.filter((f) => f !== 'index.html').map((f) => `./${f}`)];
+      // info.html is precached like any other page
       writeFileSync(
         join(outDir, 'sw.js'),
         template.replace('__VERSION__', hash.digest('hex').slice(0, 12)).replace('__ASSETS__', JSON.stringify(assets)),
@@ -68,6 +69,9 @@ export default defineConfig({
     target: 'es2023',
     assetsInlineLimit: 0,
     modulePreload: { polyfill: false },
+    rollupOptions: {
+      input: { main: 'index.html', info: 'info.html' },
+    },
   },
   worker: {
     format: 'es',
