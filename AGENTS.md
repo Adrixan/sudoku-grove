@@ -9,7 +9,11 @@ A JavaScript Sudoku game for students (ages 10 to 18) under the Prof. Aufner edu
 - Features in v1: own generator with difficulty levels; pencil marks, conflict highlighting, undo/redo and hints that explain the technique; optional timer and a seeded daily puzzle; offline PWA with progress and settings saved only in the browser.
 - Route `teens/sudoku`, classic 9x9 only.
 - Stack: Vite, strict TypeScript, vanilla DOM (no UI framework), Vitest; zero runtime dependencies.
+- Informatik-Einblicke (Peter, 2026-11-03): `info.html` explains data structure, bitmasks, PRNG, generator, backtracking and rating with live demos on the real engine; the game has an "Informatik-Blick" panel. Keep both in sync when the engine changes (texts quote simplified code). Sources there are verified; do not add facts without a checked source.
 - Name `sudoku-grove`; code licence AGPL-3.0 (like lernspiele and lernmaterial); fonts SIL OFL 1.1 with their licence texts.
+
+## Release
+- Standing order (Peter, 2026-11-03): publish after every verified change. Push `main` here, then run `npm run release` in `~/code/lernspiele.aufner.org` (it builds this repo from GitHub `main`). One SSH attempt; on failure `DEPLOY_VIA=m11x npm run release`.
 
 ## Engineering
 - Layout: `src/engine/` is pure and DOM-free (grid model, solver, technique-based rater, generator, seeded PRNG), fully covered by Vitest; `src/ui/` renders and handles input; `src/storage/` wraps browser storage with try/catch and schema versions.
