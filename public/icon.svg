@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#121212"/>
+  <rect x="80" y="80" width="352" height="352" rx="28" fill="#1e1e1e" stroke="#4ade80" stroke-width="14"/>
+  <g stroke="#3a3a3a" stroke-width="8">
+    <line x1="197" y1="80" x2="197" y2="432"/><line x1="315" y1="80" x2="315" y2="432"/>
+    <line x1="80" y1="197" x2="432" y2="197"/><line x1="80" y1="315" x2="432" y2="315"/>
+  </g>
+  <g font-family="Space Grotesk, Arial, sans-serif" font-weight="700" font-size="88" text-anchor="middle">
+    <text x="138" y="170" fill="#e0e0e0">5</text>
+    <text x="256" y="288" fill="#4ade80">3</text>
+    <text x="374" y="406" fill="#a7f3d0">9</text>
+  </g>
+</svg>
