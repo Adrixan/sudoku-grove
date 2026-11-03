@@ -1,11 +1,13 @@
 /** Small 9x9 board for the teaching demos. Interactive boards use the ARIA grid pattern with arrow keys. */
-import { CELLS, type Grid, colOf, rowOf } from '../engine/grid.ts';
+import { CELLS, type Grid, bit, colOf, rowOf } from '../engine/grid.ts';
 import { cellName } from '../engine/hints.ts';
 
 export interface MiniBoardOptions {
   label: string;
   /** called when a cell is chosen by click or keyboard; makes the board interactive */
   onSelect?: (cell: number) => void;
+  /** render pencil marks (candidates) in empty cells */
+  notes?: boolean;
 }
 
 export class MiniBoard {
@@ -13,6 +15,7 @@ export class MiniBoard {
   private readonly cells: HTMLDivElement[] = [];
   private readonly labels: HTMLSpanElement[] = [];
   private readonly values: HTMLSpanElement[] = [];
+  private readonly notes: HTMLSpanElement[][] = [];
   private selected = 0;
 
   constructor(host: HTMLElement, private readonly options: MiniBoardOptions) {
@@ -49,6 +52,20 @@ export class MiniBoard {
           cell.addEventListener('click', () => this.select(i, true));
         }
         cell.append(value);
+        if (options.notes) {
+          const box = document.createElement('span');
+          box.className = 'cell__notes';
+          box.setAttribute('aria-hidden', 'true');
+          const spans: HTMLSpanElement[] = [];
+          for (let d = 1; d <= 9; d++) {
+            const n = document.createElement('span');
+            n.textContent = String(d);
+            box.append(n);
+            spans.push(n);
+          }
+          cell.append(box);
+          this.notes.push(spans);
+        }
         row.append(cell);
         this.cells.push(cell);
         this.values.push(value);
@@ -67,6 +84,18 @@ export class MiniBoard {
       const label = this.labels[i];
       if (label) label.textContent = `${cellName(i)}, ${v ? v : 'leer'}`;
     }
+  }
+
+  /** Candidates per cell as bitmasks; `strike` marks candidates that a step removes. */
+  setNotes(cands: readonly number[], strike: ReadonlyMap<number, number> = new Map()): void {
+    this.notes.forEach((spans, i) => {
+      const mask = cands[i] ?? 0;
+      const struck = strike.get(i) ?? 0;
+      spans.forEach((s, k) => {
+        s.classList.toggle('on', (mask & bit(k + 1)) !== 0);
+        s.classList.toggle('strike', (struck & bit(k + 1)) !== 0);
+      });
+    });
   }
 
   setValue(cell: number, value: number): void {

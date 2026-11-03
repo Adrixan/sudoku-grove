@@ -36,7 +36,7 @@
   <main class="main">
     <div class="intro">
       <h1 class="title">Sudoku</h1>
-      <p class="subtitle">Jede Zeile, jede Spalte und jeder 3×3-Block enthält die Ziffern 1 bis 9 genau einmal. <a href="./info.html">Wie baut ein Computer ein Sudoku? Informatik hinter dem Spiel</a></p>
+      <p class="subtitle">Jede Zeile, jede Spalte und jeder 3×3-Block enthält die Ziffern 1 bis 9 genau einmal.</p>
     </div>
 
     <section class="controls" aria-label="Spiel wählen">
@@ -79,22 +79,24 @@
         <section class="hint-panel" id="hint-panel" aria-labelledby="hint-title" hidden>
           <h2 class="hint-panel__title" id="hint-title"></h2>
           <p class="hint-panel__text" id="hint-text"></p>
+          <p class="hint-panel__more" id="hint-more" hidden><a id="hint-more-link" href="./techniken.html">Diese Technik Schritt für Schritt lernen</a></p>
           <div class="hint-panel__actions">
             <button type="button" class="button button--primary" id="hint-apply">Anwenden</button>
             <button type="button" class="button" id="hint-close">Schließen</button>
           </div>
         </section>
 
-        <details class="settings insight" id="insight">
+        <details class="settings insight" id="insight" hidden>
           <summary>Informatik-Blick</summary>
           <div class="insight__body" id="insight-body"></div>
-          <p class="insight__more"><a href="./info.html">Mehr dazu: Informatik hinter dem Sudoku</a></p>
+          <p class="insight__more">Mehr im Lernbereich: <a href="./info.html">Informatik dahinter</a> · <a href="./techniken.html">Lösungstechniken</a> · <a href="./programmieren.html">Selbst programmieren</a></p>
         </details>
 
         <details class="settings">
           <summary>Einstellungen und Tastatur</summary>
           <label class="check"><input type="checkbox" id="show-timer"> Zeit anzeigen</label>
           <label class="check"><input type="checkbox" id="highlight-same"> Gleiche Ziffern hervorheben</label>
+          <label class="check"><input type="checkbox" id="show-insight"> Informatik-Blick anzeigen (wie der Computer dieses Sudoku sieht)</label>
           <div id="keys-help" class="keys">
             <p>Pfeiltasten: Feld wählen. 1 bis 9: Ziffer eintragen. Umschalt + Ziffer oder Notizmodus (N): Notiz setzen. Entf oder Rücktaste: löschen. Strg + Z: rückgängig, Strg + Y: wiederholen. H: Tipp.</p>
           </div>
@@ -125,6 +127,7 @@
 
   <footer class="footer">
     <p>© 2026 Peter Aufner · <a href="../../">lernspiele.aufner.org</a> · <a href="https://github.com/Adrixan/sudoku-grove">Quellcode (AGPL-3.0)</a> · <a href="./fonts/LIZENZEN.txt">Schriften (OFL)</a></p>
+    <p>Neugierig, wie das funktioniert? <a href="./info.html">Lernbereich: Informatik, Lösungstechniken und Programmieren</a></p>
     <p>Ohne Anmeldung, ohne Tracking: Dein Spielstand bleibt nur in diesem Browser.</p>
   </footer>
 </body>

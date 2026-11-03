@@ -27,6 +27,23 @@ function csp(): Plugin {
   };
 }
 
+/** Inserts tested tutorial code (regions of tutorial/sudoku-tutorial.js) into pages: <!--snippet:name-->. */
+function snippets(): Plugin {
+  const escape = (t: string): string => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return {
+    name: 'sudoku-snippets',
+    transformIndexHtml(html) {
+      if (!html.includes('<!--snippet:')) return html;
+      const source = readFileSync('tutorial/sudoku-tutorial.js', 'utf8');
+      return html.replace(/<!--snippet:(\w+)-->/g, (_, name: string) => {
+        const match = new RegExp(`// #region ${name}\\n([\\s\\S]*?)// #endregion ${name}`).exec(source);
+        if (!match?.[1]) throw new Error(`Tutorial snippet "${name}" fehlt`);
+        return `<pre tabindex="0" aria-label="Code ${name.replace('schritt', 'Schritt ')}"><code>${escape(match[1].trimEnd())}</code></pre>`;
+      });
+    },
+  };
+}
+
 function walk(dir: string): string[] {
   return readdirSync(dir).flatMap((name) => {
     const path = join(dir, name);
@@ -64,20 +81,20 @@ function serviceWorker(): Plugin {
 // Relative base: the game is served under lernspiele.aufner.org/teens/sudoku/ and must work in any subfolder.
 export default defineConfig({
   base: './',
-  plugins: [csp(), serviceWorker()],
+  plugins: [snippets(), csp(), serviceWorker()],
   build: {
     target: 'es2023',
     assetsInlineLimit: 0,
     modulePreload: { polyfill: false },
     rollupOptions: {
-      input: { main: 'index.html', info: 'info.html' },
+      input: { main: 'index.html', info: 'info.html', techniken: 'techniken.html', programmieren: 'programmieren.html' },
     },
   },
   worker: {
     format: 'es',
   },
   test: {
-    include: ['src/**/*.test.ts'],
+    include: ['src/**/*.test.ts', 'tutorial/**/*.test.ts'],
     environment: 'node',
   },
 });

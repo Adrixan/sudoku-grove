@@ -30,6 +30,7 @@
   font-family: var(--font-mono);
   /* Show ">=" and "!==" as typed, not as ligatures. */
   font-variant-ligatures: none;
+  overflow-wrap: anywhere;
   font-size: 0.9em;
   padding: 0.05em 0.3em;
   border-radius: 0.25rem;
@@ -46,6 +47,7 @@
   max-width: 100%;
 }
 .prose pre code {
+  overflow-wrap: normal;
   padding: 0;
   border: 0;
   background: none;
@@ -289,4 +291,38 @@ thead th {
 }
 .refs li {
   overflow-wrap: anywhere;
+}
+
+/* Lernbereich navigation shared by the three learning pages */
+.learn-nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem;
+}
+.learn-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch);
+  padding: 0 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 500;
+}
+.learn-nav a:hover {
+  border-color: var(--accent-line);
+}
+.learn-nav a[aria-current='page'] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+.badge--inline {
+  margin: 0 0 0 0.5rem;
+  vertical-align: middle;
 }
