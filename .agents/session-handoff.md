@@ -19,6 +19,11 @@ Last updated: 2026-11-03
 - Verified: 61 Vitest tests, tsc, npm audit clean, Playwright checks (`.scratch/learn.cjs`, `.scratch/info.cjs`, `.scratch/e2e.cjs`), axe WCAG 2.2 AA 0 violations on all four pages in dark 1280 px and light 390 px, offline load of all pages.
 - Standing order: publish after every verified change (`AGENTS.md` Release; now also a global rule in `~/.config/ai/AGENTS.md`).
 
+## 2026-11-04: CI, release notify, blockers, rule files
+- GitHub Actions in this repo: `ci.yml` (audit, typecheck, tests, build; green on `main`), `notify-site-release.yml` (after green CI on `main`; skips while `LERNSPIELE_DISPATCH_TOKEN` is unset), Dependabot (npm and actions, 1-day cooldown; no updates pending).
+- lernspiele `release.yml` now clones Cast-Game and sudoku-grove too (merge `af2ce4a`); its actions are still on `@v4` majors (upgrade = major change, needs Peter's approval).
+- Hints for hidden and naked singles outline the blocking digits (`hintBlockers`), in the game and in `techniken.html`. Released: lernspiele `20261104080134-342333` (sudoku-grove `71e9b47`), 820 files match, 31 routes HTTP 200, live page checked in a browser with desktop UA.
+- Global rules plus knowledge map now 23 364 bytes (under the 24 KB Antigravity cap): ten verbose map entries condensed, full texts under "Full text moved from the map (2026-11-04)" in the details file; backups of the old files in `.scratch/`.
+
 ## Next steps / ideas
-- Hint highlight could also mark the cells that block a hidden single.
-- Optional: kids variant (4x4/6x6) was declined for v1.
+- Nothing open. To automate releases: create `LERNSPIELE_DISPATCH_TOKEN` (this repo) plus the lernspiele Actions secrets listed in its `docs/RELEASE.md`.
