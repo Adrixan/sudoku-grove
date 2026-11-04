@@ -25,5 +25,9 @@ Last updated: 2026-11-03
 - Hints for hidden and naked singles outline the blocking digits (`hintBlockers`), in the game and in `techniken.html`. Released: lernspiele `20261104080134-342333` (sudoku-grove `71e9b47`), 820 files match, 31 routes HTTP 200, live page checked in a browser with desktop UA.
 - Global rules plus knowledge map now 23 364 bytes (under the 24 KB Antigravity cap): ten verbose map entries condensed, full texts under "Full text moved from the map (2026-11-04)" in the details file; backups of the old files in `.scratch/`.
 
+## Open decisions (Peter)
+- Create `LERNSPIELE_DISPATCH_TOKEN` and the lernspiele Actions secrets to automate releases (until then: `npm run release` in lernspiele by hand).
+- Approve the major upgrade of lernspiele `release.yml` actions (`@v4` to current v7, SHA-pinned).
+
 ## Next steps / ideas
 - Nothing open. To automate releases: create `LERNSPIELE_DISPATCH_TOKEN` (this repo) plus the lernspiele Actions secrets listed in its `docs/RELEASE.md`.
