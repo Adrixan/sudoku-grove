@@ -2,7 +2,7 @@
 import '../ui/styles.css';
 import './info.css';
 import { UNITS, bit, digitsOf } from '../engine/grid.ts';
-import { TECHNIQUE_NAMES, explain, hintArea, unitName } from '../engine/hints.ts';
+import { TECHNIQUE_NAMES, explain, hintArea, hintBlockers, unitName } from '../engine/hints.ts';
 import { TECHNIQUE_LEVEL } from '../engine/rater.ts';
 import type { Step, Technique } from '../engine/techniques.ts';
 import { MiniBoard } from '../ui/miniboard.ts';
@@ -141,12 +141,13 @@ function render(): void {
     button.setAttribute('aria-expanded', 'false');
     button.setAttribute('aria-controls', answer.id);
     const { text } = explain(step);
+    const blockers = hintBlockers(step, ex.values);
     const answerText = document.createElement('p');
     answerText.textContent = text;
     const result = document.createElement('p');
     result.className = 'demo__hint';
     result.textContent = step.placements.length
-      ? `Ergebnis: Du darfst die ${step.placements[0]?.digit} eintragen.`
+      ? `Ergebnis: Du darfst die ${step.placements[0]?.digit} eintragen.${blockers.length ? ' Gestrichelt umrandet: die Ziffern, die die anderen Möglichkeiten ausschließen.' : ''}`
       : `Ergebnis: ${step.eliminations.length} ${step.eliminations.length === 1 ? 'Kandidat fällt' : 'Kandidaten fallen'} weg (orange durchgestrichen).`;
     answer.append(answerText, result);
 
@@ -161,6 +162,7 @@ function render(): void {
       board.mark('is-hint-area', open ? hintArea(step) : []);
       board.mark('is-hint-key', open ? step.cells : []);
       board.mark('is-hint-target', open ? [...step.placements, ...step.eliminations].map((x) => x.cell) : []);
+      board.mark('is-hint-blocker', open ? blockers : []);
     });
     // Text version of the position for screen readers (the board itself is drawn only visually).
     const textBoard = document.createElement('details');

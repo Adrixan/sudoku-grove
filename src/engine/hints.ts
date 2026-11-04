@@ -1,6 +1,6 @@
 /** Hints for the player's current position, with German explanations (du-Form). */
 import { type Game, basicCandidates, wrongCells, wrongNoteCells } from './game.ts';
-import { CELLS, UNITS, boxOf, colOf, rowOf } from './grid.ts';
+import { CELLS, type Grid, PEERS, UNITS, boxOf, colOf, rowOf } from './grid.ts';
 import { type State, type Step, type Technique, findStep } from './techniques.ts';
 
 export const TECHNIQUE_NAMES: Record<Technique, string> = {
@@ -20,7 +20,7 @@ export const TECHNIQUE_NAMES: Record<Technique, string> = {
 export type Hint =
   | { kind: 'mistake'; cells: number[]; title: string; text: string }
   | { kind: 'noteMistake'; cells: number[]; title: string; text: string }
-  | { kind: 'step'; step: Step; candidates: number[]; title: string; text: string }
+  | { kind: 'step'; step: Step; candidates: number[]; blockers: number[]; title: string; text: string }
   | { kind: 'none'; cells: []; title: string; text: string };
 
 export const cellName = (cell: number): string => `Zeile ${rowOf(cell) + 1}, Spalte ${colOf(cell) + 1}`;
@@ -103,7 +103,10 @@ export function getHint(game: Game): Hint {
   const state = playerState(game);
   const step = findStep(state);
   if (!step) return { kind: 'none', cells: [], title: 'Kein Tipp', text: 'Hier findet der Tipp-Assistent gerade keinen logischen Schritt.' };
-  return { kind: 'step', step, candidates: state.cands, ...explain(step) };
+  const blockers = hintBlockers(step, game.values);
+  const { title, text } = explain(step);
+  const note = blockers.length ? ' Gestrichelt umrandet: die Ziffern, die das zeigen.' : '';
+  return { kind: 'step', step, candidates: state.cands, blockers, title, text: text + note };
 }
 
 /** Cells to highlight for a step: the units it is about; for a naked single the cell's row, column and box. */
@@ -114,4 +117,30 @@ export function hintArea(step: Step): Set<number> {
     units.push(rowOf(c), 9 + colOf(c), 18 + boxOf(c));
   }
   return new Set(units.flatMap((u) => UNITS[u]?.cells ?? []));
+}
+
+/**
+ * For singles: placed digits that show why the step works. Hidden single: for every other empty
+ * cell of the unit, one placed copy of the digit it sees. Naked single: for every other digit,
+ * one placed copy in the cell's row, column or box. Few cells, reused where possible.
+ */
+export function hintBlockers(step: Step, values: Grid): number[] {
+  const chosen = new Set<number>();
+  const pick = (cell: number, digit: number): void => {
+    const peers = PEERS[cell] ?? [];
+    if (peers.some((p) => chosen.has(p) && values[p] === digit)) return;
+    const found = peers.find((p) => values[p] === digit);
+    if (found !== undefined) chosen.add(found);
+  };
+  if (step.technique === 'hiddenSingle') {
+    const target = step.placements[0];
+    const unit = UNITS[step.units[0] ?? -1];
+    if (!target || !unit) return [];
+    for (const c of unit.cells) if (c !== target.cell && values[c] === 0) pick(c, target.digit);
+  } else if (step.technique === 'nakedSingle') {
+    const target = step.placements[0];
+    if (!target) return [];
+    for (let d = 1; d <= 9; d++) if (d !== target.digit) pick(target.cell, d);
+  }
+  return [...chosen].sort((a, b) => a - b);
 }
