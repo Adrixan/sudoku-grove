@@ -100,3 +100,44 @@ describe('hints', () => {
     }, 60_000);
   }
 });
+
+describe('hint blockers', () => {
+  it('explain every excluded cell of a hidden or naked single', async () => {
+    const { hintBlockers } = await import('./hints.ts');
+    const { arePeers, UNITS } = await import('./grid.ts');
+    const { createState, findStep, applyStep } = await import('./techniques.ts');
+    let checked = 0;
+    for (const seed of ['b1', 'b2', 'b3']) {
+      const p = generate(seed, 'mittel');
+      const state = createState(p.givens);
+      for (let step = findStep(state); step; step = findStep(state)) {
+        if (step.technique === 'hiddenSingle' || step.technique === 'nakedSingle') {
+          const blockers = hintBlockers(step, state.values);
+          const target = step.placements[0]!;
+          expect(blockers.every((b) => state.values[b] !== 0)).toBe(true);
+          if (step.technique === 'hiddenSingle') {
+            const unit = UNITS[step.units[0]!]!;
+            for (const c of unit.cells) {
+              if (c === target.cell || state.values[c] !== 0) continue;
+              // only cells excluded by a placed digit can be shown; candidates removed by earlier
+              // eliminations have no blocker
+              const seen = blockers.some((b) => state.values[b] === target.digit && arePeers(b, c));
+              const hasPlaced = state.values.some((v, i) => v === target.digit && arePeers(i, c));
+              expect(seen).toBe(hasPlaced);
+            }
+          } else {
+            for (let d = 1; d <= 9; d++) {
+              if (d === target.digit) continue;
+              const shown = blockers.some((b) => state.values[b] === d && arePeers(b, target.cell));
+              const placed = state.values.some((v, i) => v === d && arePeers(i, target.cell));
+              expect(shown).toBe(placed);
+            }
+          }
+          checked++;
+        }
+        applyStep(state, step);
+      }
+    }
+    expect(checked).toBeGreaterThan(50);
+  }, 60_000);
+});

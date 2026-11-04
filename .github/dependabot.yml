@@ -1,0 +1,20 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    # Supply-chain cooldown: only propose releases published at least one day ago
+    cooldown:
+      default-days: 1
+    open-pull-requests-limit: 10
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 1
+    open-pull-requests-limit: 10
+    labels:
+      - dependencies
+      - security

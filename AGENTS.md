@@ -15,6 +15,8 @@ A JavaScript Sudoku game for students (ages 10 to 18) under the Prof. Aufner edu
 ## Release
 - Standing order (Peter, 2026-11-03): publish after every verified change. Push `main` here, then run `npm run release` in `~/code/lernspiele.aufner.org` (it builds this repo from GitHub `main`). One SSH attempt; on failure `DEPLOY_VIA=m11x npm run release`.
 
+- GitHub Actions: `ci.yml` runs the release gates (audit, typecheck, tests, build) on `main` and `feat/**`; `notify-site-release.yml` dispatches a lernspiele release after green CI on `main` (skips while `LERNSPIELE_DISPATCH_TOKEN` is unset, then release by hand). Actions are pinned by SHA with the version as comment; Dependabot proposes updates with a 1-day cooldown.
+
 ## Engineering
 - Layout: `src/engine/` is pure and DOM-free (grid model, solver, technique-based rater, generator, seeded PRNG), fully covered by Vitest; `src/ui/` renders and handles input; `src/storage/` wraps browser storage with try/catch and schema versions.
 - Scripts the lernspiele manifest calls: `npm ci`, `npm audit --audit-level=low`, `npm run typecheck`, `npm test`, `npm run build` (output `dist`). No linter for now: strict `tsc` is the gate, which keeps the dev dependencies to Vite, TypeScript, Vitest and `@types/node`.

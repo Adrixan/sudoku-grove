@@ -167,6 +167,7 @@ export function startApp(): void {
     const area = step ? hintArea(step) : new Set<number>();
     const keyCells = new Set(step ? step.cells : hint && hint.kind !== 'step' ? hint.cells : []);
     const targets = new Set<number>(step ? [...step.placements, ...step.eliminations].map((x) => x.cell) : []);
+    const blockers = new Set<number>(hint?.kind === 'step' ? hint.blockers : []);
     const struck = new Map<number, number>();
     for (const e of step?.eliminations ?? []) struck.set(e.cell, (struck.get(e.cell) ?? 0) | bit(e.digit));
 
@@ -185,6 +186,7 @@ export function startApp(): void {
       el.classList.toggle('is-hint-area', area.has(i));
       el.classList.toggle('is-hint-key', keyCells.has(i));
       el.classList.toggle('is-hint-target', targets.has(i));
+      el.classList.toggle('is-hint-blocker', blockers.has(i));
       el.tabIndex = i === selected ? 0 : -1;
       el.setAttribute('aria-selected', String(i === selected));
       valueSpans[i]!.textContent = v ? String(v) : '';
@@ -203,6 +205,7 @@ export function startApp(): void {
       if (conflicts.has(i)) parts.push('Konflikt');
       if (showWrong.has(i)) parts.push('falsch');
       if (keyCells.has(i) || targets.has(i)) parts.push('Tipp');
+      if (blockers.has(i)) parts.push('Tipp: blockiert');
       labelSpans[i]!.textContent = parts.join(', ');
     }
 
