@@ -31,3 +31,7 @@ Last updated: 2026-11-03
 
 ## Next steps / ideas
 - Nothing open. To automate releases: create `LERNSPIELE_DISPATCH_TOKEN` (this repo) plus the lernspiele Actions secrets listed in its `docs/RELEASE.md`.
+
+## 2026-11-07: relicensed to PolyForm Noncommercial 1.0.0
+- Peter's order: only he may make money from the games. `LICENSE` is now the verbatim PolyForm Noncommercial 1.0.0 text with `Required Notice: Copyright 2026 Peter Aufner (https://prof.aufner.org)`; `package.json` license `PolyForm-Noncommercial-1.0.0`; content (learning-area texts, hints) CC BY-NC-SA 4.0; footers of all four pages, README and AGENTS.md updated. Versions before 2026-11-07 stay AGPL-3.0 for those who received them.
+- Gates green (audit 0, tsc, 62 tests, build). Not released yet: the coordinator runs `npm run release` in lernspiele once for all games.

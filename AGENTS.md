@@ -10,7 +10,8 @@ A JavaScript Sudoku game for students (ages 10 to 18) under the Prof. Aufner edu
 - Route `teens/sudoku`, classic 9x9 only.
 - Stack: Vite, strict TypeScript, vanilla DOM (no UI framework), Vitest; zero runtime dependencies.
 - Informatik-Einblicke (Peter, 2026-11-03): the game stands on its own; the deeper layer is optional. The "Informatik-Blick" panel is a setting, off by default (`settings.showInsight`). Learning area, linked quietly from the footer, the hint panel and the panel: `info.html` (Informatik dahinter: data structure, bitmasks, PRNG, generator, backtracking, rating, live demos), `techniken.html` (tutorial per technique with real examples from `src/info/technique-examples.json`, rebuilt by `npm run examples` after engine changes) and `programmieren.html` (JavaScript tutorial whose code is inserted at build time from `tutorial/sudoku-tutorial.js`, tested by Vitest). Keep texts in sync with the engine; sources there are verified, add no fact without a checked source.
-- Name `sudoku-grove`; code licence AGPL-3.0 (like lernspiele and lernmaterial); fonts SIL OFL 1.1 with their licence texts.
+- Name `sudoku-grove`; fonts SIL OFL 1.1 with their licence texts.
+- Code licence PolyForm Noncommercial 1.0.0 since 2026-11-07 (Peter): only Peter may use it commercially; versions published before that date stay available under AGPL-3.0 to those who received them. Content (learning-area texts, hint and technique explanations) CC BY-NC-SA 4.0; commercial rights reserved to Peter.
 
 ## Release
 - Standing order (Peter, 2026-11-03): publish after every verified change. Push `main` here, then run `npm run release` in `~/code/lernspiele.aufner.org` (it builds this repo from GitHub `main`). One SSH attempt; on failure `DEPLOY_VIA=m11x npm run release`.
