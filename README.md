@@ -7,4 +7,8 @@ Sudoku für [lernspiele.aufner.org](https://lernspiele.aufner.org/) (Route `teen
 - Veröffentlicht wird über die Release-Pipeline von `lernspiele.aufner.org`, nicht aus diesem Repository.
 
 ## Lizenz
-Code: AGPL-3.0 (`LICENSE`). Schriften: SIL OFL 1.1 (`public/fonts/`).
+- Code: PolyForm Noncommercial License 1.0.0 (`LICENSE`, SPDX `PolyForm-Noncommercial-1.0.0`): Nutzung, Änderung und Weitergabe für nichtkommerzielle Zwecke erlaubt, auch an Schulen und Bildungseinrichtungen.
+- Inhalte (Texte des Lernbereichs, Tipp- und Technikerklärungen): [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.de).
+- Kommerzielle Nutzung von Code und Inhalten bleibt Peter Aufner vorbehalten (Anfragen: https://prof.aufner.org).
+- Schriften: SIL OFL 1.1 (`public/fonts/`), mit eigenen Lizenztexten.
+- Code licence PolyForm Noncommercial 1.0.0 since 2026-11-07 (Peter): only Peter may use it commercially; versions published before that date stay available under AGPL-3.0 to those who received them.
