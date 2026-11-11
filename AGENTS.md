@@ -32,3 +32,7 @@ A JavaScript Sudoku game for students (ages 10 to 18) under the Prof. Aufner edu
 - German UI (Austrian usage), "du" form. No em dashes in any text.
 - Few or no runtime dependencies. All dependencies follow the global rules: latest release past the 24 h cooldown, `npm audit` before committing, no exact pins.
 - Never fetch aufner.org sites with agent tools (the host bans AI user agents on all ports). Check the live site only with curl and a desktop-browser User-Agent; run lighthouse and accessibility tools only against local builds.
+
+## Web platform (Peter, 2026-11-11)
+- New or changed HTML, CSS and client-side JS start from skill `modern-web-guidance` (installed CLI `modern-web-guidance`, not `npx`) and are checked in the browser with the `chrome-devtools` MCP.
+- Weekly modernization: `web-modernize` (Sundays 08:00, list `~/sync/ai/web-projects.txt`) runs `legacy-scan`, applies only verified behaviour-preserving fixes through this file's test and publish rules, and files larger changes in `.agents/to-do.md`.
