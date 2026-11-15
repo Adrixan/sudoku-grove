@@ -6,6 +6,7 @@ A JavaScript Sudoku game for students (ages 10 to 18) under the Prof. Aufner edu
 - Hosting: one game inside the sister site `~/code/lernspiele.aufner.org`. This repo builds a static output (`dist`); the site's release pipeline (`release-manifest.json` source entry plus a `games` path, `npm run release` there) fetches, checks, builds and deploys it. Never deploy from this repo directly.
 - Repository: public GitHub `Adrixan/sudoku-grove`.
 - Branding: Prof. Aufner, which means the lernspiele shell look (Bioluminescent Night, dark default, Cyber-Mint for educational highlights, self-hosted Space Grotesk, Inter and JetBrains Mono).
+- Theme (Peter, 2026-11-15): dark stays the default for every visitor, only a visitor's toggle choice in `lernspiele-theme` (shared with the lernspiele start page) switches to light; never follow the system colour scheme. Drop web-modernize `dark-mode-toggle` findings that propose a system default.
 - Features in v1: own generator with difficulty levels; pencil marks, conflict highlighting, undo/redo and hints that explain the technique; optional timer and a seeded daily puzzle; offline PWA with progress and settings saved only in the browser.
 - Route `teens/sudoku`, classic 9x9 only.
 - Stack: Vite, strict TypeScript, vanilla DOM (no UI framework), Vitest; zero runtime dependencies.
