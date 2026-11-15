@@ -1,5 +1,5 @@
 # Session handoff: sudoku-grove
-Last updated: 2026-11-03
+Last updated: 2026-11-15
 
 ## Trajectory
 - Project created by the Greeter; Peter decided audience, hosting, features, brand, stack, licence and route (all recorded in `AGENTS.md`).
@@ -35,3 +35,13 @@ Last updated: 2026-11-03
 ## 2026-11-07: relicensed to PolyForm Noncommercial 1.0.0
 - Peter's order: only he may make money from the games. `LICENSE` is now the verbatim PolyForm Noncommercial 1.0.0 text with `Required Notice: Copyright 2026 Peter Aufner (https://prof.aufner.org)`; `package.json` license `PolyForm-Noncommercial-1.0.0`; content (learning-area texts, hints) CC BY-NC-SA 4.0; footers of all four pages, README and AGENTS.md updated. Versions before 2026-11-07 stay AGPL-3.0 for those who received them.
 - Gates green (audit 0, tsc, 62 tests, build). Not released yet: the coordinator runs `npm run release` in lernspiele once for all games.
+
+## 2026-11-15: web-modernize run (Modern Web Guidance legacy-scan)
+- Scanned `src`, `tutorial`, `public` and the four HTML pages with `modern-web-guidance legacy-scan` (CLI 1.0.0; `dist`, `node_modules` left out). One finding: `dark-mode-toggle` on `public/theme-init.js:9`.
+- Verified against the rubric: keepWhen matches, but the guide's remedy changes behaviour (system default instead of the fixed dark default, new toggle semantics, storage key shared with the lernspiele shell). Not applied; filed as a proposal in `.agents/to-do.md`.
+- No code change, no release (dist unchanged). Report: `~/sync/ai/web-modernize/2026-11-15/sudoku-grove.md`.
+- From now on the AGENTS.md "Web platform" rule is the standard for web work here.
+
+## Open decisions (Peter, 2026-11-15)
+- `.agents/to-do.md`: color scheme proposal (keep, half step, or full guide pattern together with lernspiele).
+- Dependabot branch `origin/dependabot/npm_and_yarn/vite-8.3.7` is open (not touched by this run).
